@@ -1,0 +1,120 @@
+---
+title: 'Statistical Inference Course Project Part 2 : Analyze the ToothGrowth Dataset'
+author: "Jonathan Lok-Chuen Lo"
+date: "October 25, 2015"
+output: pdf_document
+geometry: margin=0.75in
+---
+
+```{r set_options, echo=FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE, 
+    warning = FALSE, 
+    message = FALSE,
+    fig.path = "figure/",
+    fig.height = 4.5,
+    fig.width = 8)
+```
+
+# Overview
+
+In this project, I will analyze the ToothGrowth data in the R datasets package. 
+Basic exploratory data analyses will be performed. Confidence intervals and
+hypothesis tests are also used to compare tooth growth by supp and dose.
+Finally an conclusions and the corresponding assumptions will be given.
+
+# Load the Data
+
+Load the ToothGrowth data in the dataset package, and all the necessary 
+libraries. Convert dose into factor for plotting purposes later.
+
+```{r load_data}
+library(datasets)
+library(lattice)
+
+data(ToothGrowth)
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+```
+
+# Basic Summary of the Data
+
+Display the structure and summary of the dataset.
+
+```{r summary_data}
+str(ToothGrowth)
+summary(ToothGrowth)
+```
+
+# Exploratory Data Analysis
+
+Plot the tooth growth against dose for different supplement type. Increase 
+dosage seems to stimulate faster tooth growth for both supplement types.
+
+```{r explore_data_1, echo = FALSE}
+bwplot(
+    len ~ dose | supp, 
+    data = ToothGrowth,
+    main = "Tooth Growth vs Dose of Different Supplement",
+    cex = 0.75,
+    xlab = "Dose",
+    ylab = "Length of Tooth Growth",
+    fill = c("red3", "green3", "blue3"))
+```
+
+Plot the tooth growth against supplement type at different dosage. The effect is
+not obvious. 
+
+```{r explore_data_2, echo = FALSE}
+bwplot(
+    len ~ supp | dose, 
+    data = ToothGrowth,
+    main = "Tooth Growth vs Supplement Types at Different Dose",
+    cex = 0.75,
+    xlab = "Supplement",
+    ylab = "Length of Tooth Growth",
+    fill = c("yellow3", "maroon3"))
+```
+
+# Compare Tooth Growth by Supplement and Dose
+
+### Perform t-test on tooth growth between different supplement types.
+
+```{r}
+t <- t.test(ToothGrowth$len[ToothGrowth$supp == "OJ"],ToothGrowth$len[ToothGrowth$supp == "VC"], 
+            paired = FALSE, var.equal = FALSE)
+list(PValue = t$p.value, ConfidenceInterval = as.numeric(t$conf.int))
+```
+
+P-value is `r sprintf("%1.2f%%", 100*t$p.value)`. This indicates we can accept
+the null hypothesis of difference in tooth growth being zero using different 
+supplement with 95% confidence. This is also shown that zero is included
+within the 95% confidence interval.
+
+### Perform t-test on tooth growth when dosage increase from 0.5mg to 2mg.
+
+```{r}
+t <- t.test(ToothGrowth$len[ToothGrowth$dose == "2"], ToothGrowth$len[ToothGrowth$dose == "0.5"], 
+       paired = FALSE, var.equal = FALSE)
+list(PValue = t$p.value, ConfidenceInterval = as.numeric(t$conf.int))
+```
+
+P-value is `r sprintf("%1.2f%%", 100*t$p.value)`. This indicates we can reject 
+the null hypothesis, i.e. accept the alternative of difference in tooth growth 
+not equal to zero as dosage increases. The 95% confidence interval does not 
+include zero also means that tooth growth is increased by increasing the dosage
+from 0.5mg to 2mg.
+
+# Conclusions
+
+Using the t-test analysis, we have concluded the following:
+
+1. Supplement type has no statistically significant effect on tooth growth.
+2. Tooth growth can be increasing by increasing the dosage level.
+
+The analysis is based on the following assumptions:
+
+* Dosage and supplement types are random assigned to the guinea pigs.
+* Sample population are representative of the entire population of guinea 
+pigs.
+* For the t-tests, data area assumed not paired and variances are different 
+among different groups.

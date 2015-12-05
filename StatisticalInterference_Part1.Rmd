@@ -1,0 +1,169 @@
+---
+title: 'Statistical Inference Course Project Part 1 : Central Limit Theorem using
+  Simulation'
+author: "Jonathan Lok-Chuen Lo"
+date: "October 25, 2015"
+output: pdf_document
+geometry: margin=0.75in
+---
+
+```{r set_options, echo=FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE, 
+    warning = FALSE, 
+    message = FALSE,
+    fig.path = "figure/",
+    fig.height = 4,
+    fig.width = 6,
+    fig.pos = "center")
+```
+
+# Overview
+
+In this project, I will investigate the exponential distribution in R and 
+compare it with the Central Limit Theorem. The exponential distribution is used
+and simulated in R with `rexp(n, lambda)` where lambda is the rate parameter. 
+I will investigate the distribution of 40 exponentials and set lambda = 0.2.
+The simulated mean and standard deviation will be compared against the
+theoretical values to illustrate the Central Limit Theorem.
+
+# Simulations
+
+Generate the simulated data from exponential distribution with lambda = 0.2 and 
+number of exponentials = 40. A thousand simulations is produced, and hence total
+of 40,000 simulated data is required.
+
+```{r simulate_data}
+# Initialise the seed to ensure reproducibility
+set.seed(8)
+
+# Parameters for the simulation
+n <- 40
+lambda <- 0.2
+numSimulations <- 1000
+
+# Generate the simulated data and compare the sample mean and variance
+simulatedData <- matrix(rexp(n * numSimulations, lambda), numSimulations, n)
+simulatedDataMean <- apply(simulatedData, 1, mean)
+simulatedDataVar <- apply(simulatedData, 1, var)
+```
+
+# Sample Mean versus Theoretical Mean
+
+Calculate the average sample mean and compare it against the theoretical mean of
+exponential distribution, which is equal to 1/lambda.
+
+```{r compute_mean}
+sampleMean <- mean(simulatedDataMean)
+theoreticalMean <- 1 / lambda
+
+# Print the results
+cbind(sampleMean, theoreticalMean)
+```
+
+Tha sample mean is **`r round(sampleMean, 4)`** while the theoretical 
+mean is **`r round(theoreticalMean, 4)`**. 
+
+Following is a plot of the distribution of the sample mean distribution. This 
+shows that the sample mean is a very good estimate of the theoretical mean. The 
+corresponding normal distribution is plotted in blue as a reference and the 
+sample mean does appear to be close to normal.
+
+```{r plot_mean, echo=FALSE}
+h <- hist(
+    simulatedDataMean,
+    main = "Distribution of the Sample Mean of the Simulated Data",
+    xlab = "Sample Mean",
+    col = "gray",
+    cex.lab = 0.75)
+
+abline(v = sampleMean, col = "red", lwd = 2)
+abline(v = theoreticalMean, col = "green", lwd = 2)
+
+legend(
+    "topright", 
+    legend = c("AVerage Sample Mean", "Theoretical Mean"),
+    col = c("red", "green"),
+    lwd = 2,
+    cex = 0.75)
+
+xfit <- seq(from = 0, to = 8, length.out = 100) 
+yfit <- dnorm(xfit, mean = mean(simulatedDataMean), sd = sd(simulatedDataMean))
+yfit <- yfit * diff(h$mids[1:2]) * length(simulatedDataMean) 
+
+lines(xfit, yfit, col = "blue", lwd = 2)
+```
+
+# Sample Variance versus Theoretical Variance
+
+Calculate the average sample variance and compare it against the theoretical 
+variance of exponential distribution, which is equal to (1/lambda)^2.
+
+```{r compute_var}
+sampleVar <- mean(simulatedDataVar)
+theoreticalVar <- (1 / lambda)^2
+
+# Print the results
+cbind(sampleVar, theoreticalVar)
+```
+
+Tha sample variance is **`r round(sampleVar, 4)`** while the theoretical 
+variance is **`r round(theoreticalVar, 4)`**. 
+
+Following is a plot of the distribution of the sample variance. This again shows
+that the sample variance is a very good estimate of the theoretical variance. 
+The corresponding normal distribution of the sample variance is plotted in blue 
+and the sample variance does appear to be close to normal.
+
+```{r plot_var, echo=FALSE}
+h <- hist(
+    simulatedDataVar,
+    main = "Distribution of the Sample Variance of the Simulated Data",
+    xlab = "Sample Variance",
+    col = "gray",
+    cex.lab = 0.75)
+
+abline(v = sampleVar, col = "red", lwd = 2)
+abline(v = theoreticalVar, col = "green", lwd = 2)
+
+legend(
+    "topright", 
+    legend = c("Average Sample Variance", "Theoretical Variance"),
+    col = c("red", "green"),
+    lwd = 2,
+    cex = 0.75)
+
+xfit <- seq(from = 0, to = 85, length.out = 100) 
+yfit <- dnorm(xfit, mean = mean(simulatedDataVar), sd = sd(simulatedDataVar))
+yfit <- yfit * diff(h$mids[1:2]) * length(simulatedDataVar) 
+
+lines(xfit, yfit, col = "blue", lwd = 2)
+```
+
+
+# Distribution
+
+Below is a plot of the exponential distribution with number of exponentials = 40
+and lambda = 0.2. It can be seen that although the distribution is very 
+different to a normal distribution, the distribution of the sample mean and 
+sample variance are close to normal as shown earlier.
+
+```{r plot_dist, echo=FALSE}
+hist(
+    simulatedData,
+    main = "Exponential Distribution with n = 40 and lambda = 0.2",
+    xlab = "Data",
+    col = "gray",
+    cex.lab = 0.75)
+
+abline(v = 1/lambda, col = "red", lwd = 2)
+
+legend(
+    "topright", 
+    legend = c("Theoretical Mean"),
+    col = c("red"),
+    lwd = 2,
+    cex = 0.75)
+```
+
+

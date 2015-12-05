@@ -1,0 +1,49 @@
+# Appendix
+
+Below plots the historgram of the sample mean distribution, with the average
+sample mean and the theoretical mean shown. Again, this shows the average 
+sample mean is very close to the theoretical value.
+
+```{r plot_mean, echo=FALSE}
+hist(
+    simulatedDataMean,
+    main = "Distribution of the Sample Mean of the Simulated Data",
+    xlab = "Sample Mean",
+    col = "gray",
+    cex.lab = 0.75)
+
+abline(v = sampleMean, col = "red", lwd = 2)
+abline(v = theoreticalMean, col = "green", lwd = 2)
+
+legend(
+    "topright", 
+    legend = c("Sample Mean", "Theoretical Mean"),
+    col = c("red", "green"),
+    lwd = 2)
+```
+
+
+
+```{r plot_sample_mean_dist, echo=FALSE}
+h <- hist(
+    simulatedDataMean,
+    main = "Distribution of the Sample Mean of the Simulated Data",
+    xlab = "Sample Mean",
+    col = "gray",
+    cex.lab = 0.75)
+
+abline(v = mean(simulatedDataMean), col = "red", lwd = 2)
+
+xfit <- seq(from = 0, to = 8, length.out = 100) 
+yfit <- dnorm(xfit, mean = mean(simulatedDataMean), sd = sd(simulatedDataMean))
+yfit <- yfit * diff(h$mids[1:2]) * length(simulatedDataMean) 
+
+lines(xfit, yfit, col = "blue", lwd = 2)
+
+legend(
+    "topright", 
+    legend = c("Sample Mean"),
+    col = c("red"),
+    lwd = 2)
+```
+
